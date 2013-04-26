@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<info>
+	<mod-author name="Alexandr Chernakov" email="alexandr.chernakov@gmail.com"/>
+</info>
+
+<textures>
+	<texture name="wall" path="res/art/ground.bmp" type="terrain" states="1" animated="false"/>
+	<texture name="sand" path="res/art/ground.bmp" type="terrain" states="1" animated="false"/>
+	<texture name="ground" path="res/art/ground.bmp" type="terrain" states="1" animated="fallse"/>
+	<texture name="rock" path="res/art/rock.bmp" type="terrain" states="1" animated="false"/>
+	<texture name="player" path="res/art/player.bmp" type="monster" animated="true">
+		<animation>
+			<motion name="walk" steps="4" row="0"/>
+			<motion name="dig" steps="4" row="1"/>
+			<motion name="stop" steps="1" row="2"/>
+		</animation>
+	</texture>
+	<texture name="zombie" path="res/art/zombie.bmp" type="monster" animated="true">
+		<animation>
+			<motion name="walk" steps="4" row="0"/>
+			<motion name="dig" steps="4" row="1"/>
+			<motion name="stop" steps="1" row="2"/>
+		</animation>
+	</texture>
+</textures>
+
+<map>
+	<default>ground</default>
+	<terrain-types>
+		<ttype name="ground" texture="ground" mapId="0" empty="true" diggable="false" destroyable="false" durability="100"/>
+		<ttype name="rock" texture="rock" mapId="1" empty="false" diggable="true" destroyable="true" durability="100"/>
+		<ttype name="wall" texture="wall" mapId="2" empty="false" diggable="false" destroyable="false" durability="100"/>
+		<ttype name="sand" texture="sand" mapId="3" empty="false" diggable="true" destroyable="true" durability="50"/>
+	</terrain-types>
+</map>
+
+<monsters>
+	<monster name="zombie" texture="zombie" id="4" health="100" damage="30" speed="10" dig="40"/>
+</monsters>
+
+<player texture="player" id="5" health="100" damage="10" speed="20" dig="50"/>
+
+<items>
+	<item name="hpack" id="6"/>
+	<item name="pickaxe" id="7"/>
+	<item name="ammo" id="8"/>
+</items>
+
+<network>
+	<server default="127.0.0.1" />
+</network>
+
+<net>
+	<default name="contense"></default>
+</net>
