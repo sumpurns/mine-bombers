@@ -9,6 +9,7 @@
 #include "textures_reg.h"
 #include "terrain.h"
 #include "terrain_defs.h"
+#include "socket.h"
 #include "xml.h"
 
 static SDL_Surface * Screen;
@@ -90,6 +91,12 @@ int main (int argc, char ** argv) {
 		std::cout << "Can't init video mode" << std::endl;
 		return 1;
 	}
+
+	Client clnt;
+	std::string msg = "Hello, my pretty sockets";
+	clnt.Init();
+	clnt.Connect("localhost", "12345");
+	clnt.Send(msg.c_str(), msg.length() + 1);
 
 	TextureRegistry texReg;
 	texReg.Load("res/game.xml");
