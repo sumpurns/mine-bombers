@@ -2,9 +2,11 @@
 #include <vector>
 #include <stdexcept>
 #include <fstream>
+#include <cstring>
 #include <SDL/SDL.h>
 #include "helpers.h"
 #include "config.h"
+#include "shared_config.h"
 #include "texture.h"
 #include "textures_reg.h"
 #include "terrain.h"
@@ -93,10 +95,9 @@ int main (int argc, char ** argv) {
 	}
 
 	Client clnt;
-	std::string msg = "Hello, my pretty sockets";
 	clnt.Init();
 	clnt.Connect("localhost", "12345");
-	clnt.Send(msg.c_str(), msg.length() + 1);
+	clnt.Send(SERVER_GREETING, strlen(SERVER_GREETING) + 1);
 
 	TextureRegistry texReg;
 	texReg.Load("res/game.xml");

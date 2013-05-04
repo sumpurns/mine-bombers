@@ -47,9 +47,9 @@
 	<item name="ammo" id="8"/>
 </items>
 
-<network>
-	<server default="127.0.0.1" />
-</network>
+<server>
+	<network port="12345"/>
+</server>
 
 <net>
 	<default name="contense"></default>
