@@ -2,6 +2,7 @@
 //#include "socket.h"
 #include "server_listner.h"
 #include "server_worker.h"
+#include "thread.h"
 
 int main (int argc, char ** argv) {
 	std::cout << "MineBombers server. You are welcome." << std::endl;

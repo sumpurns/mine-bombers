@@ -96,7 +96,7 @@ int main (int argc, char ** argv) {
 
 	Client clnt;
 	clnt.Init();
-	clnt.Connect("localhost", "12345");
+	clnt.Connect("minebombers.servegame.com", "12345");
 	clnt.Send(SERVER_GREETING, strlen(SERVER_GREETING) + 1);
 
 	TextureRegistry texReg;

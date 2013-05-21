@@ -12,7 +12,13 @@ ServerWorker::~ServerWorker () {
 	Stop ();
 }
 
-void ServerWorker::Start (int sockfd) throw (std::runtime_error) {
+void ServerWorker::Stop () {
+	if (Active) {
+	}
+}
+
+void * ServerWorker::Main (void * arg) throw (std::runtime_error) {
+	int sockfd = *reinterpret_cast<int*>(arg);
 	char buf[300];
 	Clnt.Init (sockfd);
 	Active = true;
@@ -21,9 +27,9 @@ void ServerWorker::Start (int sockfd) throw (std::runtime_error) {
 		throw std::runtime_error((std::string("Wrong protocol: ") + buf).c_str());
 	}
 	std::cout << buf << std::endl;
+	return NULL;
 }
 
-void ServerWorker::Stop () {
-	if (Active) {
-	}
+void ServerWorker::Serve (int sock) throw (std::runtime_error) {
+	Start(&sock);
 }

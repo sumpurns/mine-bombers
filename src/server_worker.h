@@ -3,13 +3,16 @@
 
 #include <stdexcept>
 #include "socket.h"
+#include "thread.h"
 
-class ServerWorker {
+class ServerWorker : public Thread {
 	public:
 		ServerWorker () throw (std::runtime_error);
 		virtual ~ServerWorker ();
 
-		void Start (int sockfd) throw (std::runtime_error);
+		void Serve (int sockfd) throw (std::runtime_error);
+		void * Main (void * arg) throw (std::runtime_error);
+		void Run (int sockfd) throw (std::runtime_error);
 		void Stop ();
 
 	protected:
