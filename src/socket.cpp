@@ -1,10 +1,14 @@
 #include "socket.h"
 
+#include <fstream>
+#include <algorithm>
 #include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+
+#include "shared_config.h"
 
 Socket::Socket () throw (std::runtime_error) {
 	Active = false;
@@ -56,6 +60,48 @@ size_t Socket::Recv (char * data, size_t size) throw (std::runtime_error) {
 		throw std::runtime_error("Error while Recv();");
 	}
 	return (size_t)ret;
+}
+
+void Socket::SendFile (const std::string & path) throw (std::runtime_error) {
+	std::ifstream file;
+	file.open(path.c_str(), std::ios_base::in | std::ios_base::binary);
+	if (!file.is_open()) {
+		throw std::runtime_error("Can't open file for sending via socket");
+	}
+	
+	file.seekg(0, std::fstream::end);
+	size_t fileSize = file.tellg();
+	Send(reinterpret_cast<char*>(&fileSize), sizeof(size_t));
+
+	file.seekg(0, std::fstream::beg);
+	size_t readen, sent;
+	char buf[NET_BLOCK];
+	while (file.good()) {
+		readen = file.readsome(buf, NET_BLOCK);
+		sent = Send(buf, readen);
+		if (sent != readen) {
+			throw std::runtime_error("Error sending a chunk");
+		}
+	}
+	file.close();
+}
+
+void Socket::RecvFile (const std::string & path) throw (std::runtime_error) {
+	std::ofstream file;
+	file.open(path.c_str());
+	if (!file.is_open()) {
+		throw std::runtime_error("Can't open a file to recieve the data");
+	}
+
+	size_t fileSize, recvd, written = 0;
+	char buf[NET_BLOCK];
+	Recv(reinterpret_cast<char*>(&fileSize), sizeof(size_t));
+	while (written < fileSize) {
+		recvd = Recv(buf, std::min(fileSize - written, (size_t)NET_BLOCK));
+		file.write(buf, recvd);
+		written += recvd;
+	}
+	file.close();
 }
 
 Client::Client () throw (std::runtime_error) {

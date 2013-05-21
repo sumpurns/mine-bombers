@@ -15,7 +15,13 @@ class ServerWorker : public Thread {
 		void Run (int sockfd) throw (std::runtime_error);
 		void Stop ();
 
+		
+		void CheckProtocol () throw (std::runtime_error);
+		void GetRequest () throw (std::runtime_error);
+		void SendResponse () throw (std::runtime_error);
+
 	protected:
+		int GivenSockFd;
 	private:
 		bool Active;
 		Client Clnt;

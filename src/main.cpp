@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstring>
 #include <SDL/SDL.h>
+
 #include "helpers.h"
 #include "config.h"
 #include "shared_config.h"
@@ -13,6 +14,7 @@
 #include "terrain_defs.h"
 #include "socket.h"
 #include "xml.h"
+#include "map.h"
 
 static SDL_Surface * Screen;
 
@@ -30,57 +32,39 @@ static void Sulock() {
 	}
 }
 
-
-class Map {
+class ClientWorker {
 	public:
-		Map () throw (std::runtime_error);
-		virtual ~Map ();
+		ClientWorker () throw (std::runtime_error);
+		virtual ~ClientWorker ();
 
-		void Load (const std::string & file, TerrainDefaults & tDefs) throw (std::runtime_error);
-		void Draw (SDL_Surface * screen, TextureRegistry & tReg) throw (std::runtime_error);
+		void Connect () throw (std::runtime_error);
+		void CheckProtocol () throw (std::runtime_error);
+	protected: 
 	private:
-		std::vector< std::vector <TerrainElement> > Field;
-		int Width;
-		int Height;
-		bool Loaded;
+		Client Clnt;
 };
 
-Map::Map () throw (std::runtime_error) {
-	Loaded = false;
+ClientWorker::ClientWorker () throw (std::runtime_error) {
 }
 
-Map::~Map () {
+ClientWorker::~ClientWorker () {
 }
 
-void Map::Load (const std::string & file, TerrainDefaults & tDefs) throw (std::runtime_error) {
-	std::ifstream f;
-	f.open(file.c_str(), std::ios_base::in | std::ios_base::binary);
-	if (!f.is_open()) {
-		throw std::runtime_error(("Can't open file " + file).c_str());
-	}
-	std::vector<unsigned char> tmp;
-	f.read(reinterpret_cast<char*>(&Width), sizeof(int));
-	f.read(reinterpret_cast<char*>(&Height), sizeof(int));
-	Field.resize(Height);
-	tmp.resize(Width);
-	for (int y = 0; y < Height; y++) {
-		Field[y].resize(Width);
-		if (!f.read(reinterpret_cast<char*>(tmp.data()), (size_t)Width).good()) {
-			throw std::runtime_error ("Error while reading map file");
-		}
-		for (int x = 0; x < Width; x++) {
-			Field[y][x] = tDefs.GetElementByMapId((int)tmp[x]);
-		}
-	}
-	f.close();
+void ClientWorker::Connect () throw (std::runtime_error) {
+	Clnt.Init();
+	Clnt.Connect("localhost", "12345");
 }
 
-void Map::Draw (SDL_Surface * screen, TextureRegistry & tReg)  throw(std::runtime_error) {
-	for (int y = 0; y < Height; y++) {
-		for (int x = 0; x < Width; x++) {
-			tReg[Field[y][x].GetTextureId()].GridDraw(screen, x, y, 0, 0);
-		}
+void ClientWorker::CheckProtocol () throw (std::runtime_error) {
+	Clnt.Send(SERVER_GREETING, strlen(SERVER_GREETING) + 1);
+	char buf[20];
+	Clnt.Recv(buf, strlen(CLIENT_GREETING) + 1);
+	if (strcmp(CLIENT_GREETING, buf)) {
+		throw std::runtime_error("Wrong server reply");
 	}
+	std::cout << buf << std::endl;
+
+	Clnt.RecvFile("test.xml");
 }
 
 int main (int argc, char ** argv) {
@@ -94,10 +78,14 @@ int main (int argc, char ** argv) {
 		return 1;
 	}
 
-	Client clnt;
-	clnt.Init();
-	clnt.Connect("minebombers.servegame.com", "12345");
-	clnt.Send(SERVER_GREETING, strlen(SERVER_GREETING) + 1);
+	ClientWorker ClntWrk;
+	try {
+		ClntWrk.Connect();
+		ClntWrk.CheckProtocol();
+	} catch (std::runtime_error & err) {
+		std::cout << err.what() << ", finishing client" << std::endl;
+		return 1;
+	}
 
 	TextureRegistry texReg;
 	texReg.Load("res/game.xml");
@@ -114,11 +102,6 @@ int main (int argc, char ** argv) {
 	bool Done = false;
 	while (!Done) {
 		Slock();
-			/*for (int x = 0; x < 10; x++) {
-				for (int y = 0; y < 10; y++) {
-					gnd.GridDraw(Screen, x, y, 0, 0);
-				}
-			}*/
 			map.Draw(Screen, texReg);
 			SDL_Flip(Screen);
 		Sulock();

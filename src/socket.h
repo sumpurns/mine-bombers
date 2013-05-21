@@ -15,6 +15,9 @@ class Socket {
 
 		size_t Send (const char * data, size_t size) throw (std::runtime_error);
 		size_t Recv (char * data, size_t size) throw (std::runtime_error);
+
+		void SendFile (const std::string & path) throw (std::runtime_error);
+		void RecvFile (const std::string & path) throw (std::runtime_error);
 	protected:
 		int Sock;
 		bool Active;

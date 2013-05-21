@@ -18,18 +18,31 @@ void ServerWorker::Stop () {
 }
 
 void * ServerWorker::Main (void * arg) throw (std::runtime_error) {
-	int sockfd = *reinterpret_cast<int*>(arg);
-	char buf[300];
-	Clnt.Init (sockfd);
+	Clnt.Init (GivenSockFd);
 	Active = true;
-	Clnt.Recv (buf, strlen(SERVER_GREETING) + 1);
-	if (strcmp(buf, SERVER_GREETING)) {
-		throw std::runtime_error((std::string("Wrong protocol: ") + buf).c_str());
+
+	try {
+		CheckProtocol ();
+	} catch (std::runtime_error & err) {
+		std::cout << err.what() << ", finishing worker" << std::endl;
+		return NULL;
 	}
-	std::cout << buf << std::endl;
+
+	Clnt.SendFile("res/game.xml");
+
 	return NULL;
 }
 
 void ServerWorker::Serve (int sock) throw (std::runtime_error) {
-	Start(&sock);
+	GivenSockFd = sock;
+	Start(NULL);
+}
+void ServerWorker::CheckProtocol () throw (std::runtime_error) {
+	char buf[20];
+	Clnt.Recv (buf, strlen(SERVER_GREETING) + 1);
+	if (strcmp(buf, SERVER_GREETING)) {
+		throw std::runtime_error("Wrong protocol");
+	}
+	std::cout << buf << std::endl;
+	Clnt.Send (CLIENT_GREETING, strlen(CLIENT_GREETING) + 1);
 }
