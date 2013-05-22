@@ -12,7 +12,6 @@ ServerWorker::ServerWorker (const ServerWorker & oth) throw (std::runtime_error)
 : Shared(oth.Shared) {
 	Active = oth.Active;
 	GivenSockFd = oth.GivenSockFd;
-	//throw std::runtime_error("Called copy constructor of a ServerWorker");
 }
 
 ServerWorker::~ServerWorker () {

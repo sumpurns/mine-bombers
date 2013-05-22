@@ -72,7 +72,10 @@ void Socket::SendFile (const std::string & path) throw (std::runtime_error) {
 	
 	file.seekg(0, std::fstream::end);
 	size_t fileSize = file.tellg();
-	Send(reinterpret_cast<char*>(&fileSize), sizeof(size_t));
+	size_t snt = Send(reinterpret_cast<char*>(&fileSize), sizeof(size_t));
+	if (snt == 0) {
+		throw std::runtime_error("Disconnected suddenly while sending a file");
+	}
 
 	file.seekg(0, std::fstream::beg);
 	size_t readen, sent;
@@ -84,7 +87,10 @@ void Socket::SendFile (const std::string & path) throw (std::runtime_error) {
 		}
 		size_t stBlock = 0;
 		while (stBlock < readen) {
-			stBlock += Send(buf + stBlock, readen - stBlock);
+			stBlock += (snt = Send(buf + stBlock, readen - stBlock));
+			if (snt == 0) {
+				throw std::runtime_error("Disconnected suddenly while sending a file");
+			}
 		}
 	}
 	file.close();
@@ -99,9 +105,15 @@ void Socket::RecvFile (const std::string & path) throw (std::runtime_error) {
 
 	size_t fileSize, recvd, written = 0;
 	char buf[NET_BLOCK];
-	Recv(reinterpret_cast<char*>(&fileSize), sizeof(size_t));
+	size_t rcv = Recv(reinterpret_cast<char*>(&fileSize), sizeof(size_t));
+	if (rcv == 0) {
+		throw std::runtime_error("Disconnected suddenly while recieving a file");
+	}
 	while (written < fileSize) {
 		recvd = Recv(buf, std::min(fileSize - written, (size_t)NET_BLOCK));
+		if (recvd == 0) {
+			throw std::runtime_error("Disconnected suddenly while recieving a file");
+		}
 		file.write(buf, recvd);
 		written += recvd;
 	}
@@ -110,16 +122,28 @@ void Socket::RecvFile (const std::string & path) throw (std::runtime_error) {
 
 void Socket::SendString (const std::string & str) throw (std::runtime_error) {
 	size_t len = str.length() + 1;
-	Send (reinterpret_cast<char*>(&len), sizeof(size_t));
-	Send (reinterpret_cast<const char*>(str.data()), len);
+	size_t ret = Send (reinterpret_cast<char*>(&len), sizeof(size_t));
+	if (ret == 0) {
+		throw std::runtime_error("Disconnected suddenly while sending a string");
+	}
+	ret = Send (reinterpret_cast<const char*>(str.data()), len);
+	if (ret == 0) {
+		throw std::runtime_error("Disconnected suddenly while sending a string");
+	}
 }
 
 void Socket::RecvString (std::string & str) throw (std::runtime_error) {
-	size_t len;
-	Recv (reinterpret_cast<char*>(&len), sizeof(size_t));
+	size_t len, ret;
+	ret = Recv (reinterpret_cast<char*>(&len), sizeof(size_t));
+	if (ret == 0) {
+		throw std::runtime_error("Disconnected suddenly while recieving a string");
+	}
 	std::vector<char> tstr;
 	tstr.resize(len);
-	Recv (reinterpret_cast<char*>(tstr.data()), len);
+	ret = Recv (reinterpret_cast<char*>(tstr.data()), len);
+	if (ret == 0) {
+		throw std::runtime_error("Disconnected suddenly while recieving a string");
+	}
 	str.assign(tstr.begin(), tstr.end() - 1);
 }
 
