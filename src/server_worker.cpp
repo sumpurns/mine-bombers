@@ -40,6 +40,8 @@ void * ServerWorker::Main (void * arg) throw (std::runtime_error) {
 			GetRequest();
 		} catch (std::runtime_error & err) {
 			std::cout << err.what() << ". Finishing the worker cause of GetRequest exception" << std::endl;
+			finished = true;
+			break;
 		}
 		if (LastReq == REQ_FINISH) {
 			finished = true;
@@ -50,6 +52,8 @@ void * ServerWorker::Main (void * arg) throw (std::runtime_error) {
 			SendResponse();
 		} catch (std::runtime_error & err) {
 			std::cout << err.what() << ". Finishing the worker cause of SendResponse exception" << std::endl;
+			finished = true;
+			break;
 		}
 	}
 
