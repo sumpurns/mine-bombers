@@ -30,7 +30,7 @@ int main (int argc, char ** argv) {
 
 	ServerShared shared;
 
-	ServerListner srv;
+	ServerListner srv(shared);
 	srv.Load("res/game.xml");
 	srv.Start();
 	

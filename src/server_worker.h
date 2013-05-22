@@ -5,10 +5,12 @@
 #include "socket.h"
 #include "thread.h"
 #include "shared_config.h"
+#include "server_shared.h"
 
 class ServerWorker : public Thread {
 	public:
-		ServerWorker () throw (std::runtime_error);
+		ServerWorker (ServerShared & shrd) throw (std::runtime_error);
+		ServerWorker (const ServerWorker & oth) throw (std::runtime_error);
 		virtual ~ServerWorker ();
 
 		void Serve (int sockfd) throw (std::runtime_error);
@@ -24,6 +26,7 @@ class ServerWorker : public Thread {
 	protected:
 		int GivenSockFd;
 	private:
+		ServerShared & Shared;
 		bool Active;
 		Client Clnt;
 		RequestType LastReq;

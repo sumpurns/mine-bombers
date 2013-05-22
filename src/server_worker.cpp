@@ -3,8 +3,16 @@
 #include <iostream>
 #include <cstring>
 
-ServerWorker::ServerWorker () throw (std::runtime_error) {
+ServerWorker::ServerWorker (ServerShared & shrd) throw (std::runtime_error) 
+: Shared(shrd) {
 	Active = false;
+}
+
+ServerWorker::ServerWorker (const ServerWorker & oth) throw (std::runtime_error) 
+: Shared(oth.Shared) {
+	Active = oth.Active;
+	GivenSockFd = oth.GivenSockFd;
+	//throw std::runtime_error("Called copy constructor of a ServerWorker");
 }
 
 ServerWorker::~ServerWorker () {

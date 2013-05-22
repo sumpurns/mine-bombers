@@ -6,10 +6,11 @@
 #include <stdexcept>
 #include "socket.h"
 #include "server_worker.h"
+#include "server_shared.h"
 
 class ServerListner {
 	public:
-		ServerListner () throw (std::runtime_error);
+		ServerListner (ServerShared & shrd) throw (std::runtime_error);
 		virtual ~ServerListner ();
 
 		void Load (const std::string & configFile) throw (std::runtime_error);
@@ -21,6 +22,8 @@ class ServerListner {
 		void StartRound () throw (std::runtime_error);
 	protected:
 	private:
+		ServerShared & Shared;
+
 		bool Loaded;
 		bool Started;
 		Server Serv;

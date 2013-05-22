@@ -2,7 +2,8 @@
 #include "server_worker.h"
 #include "xml.h"
 
-ServerListner::ServerListner () throw (std::runtime_error) {
+ServerListner::ServerListner (ServerShared & shrd) throw (std::runtime_error) 
+: Shared(shrd) {
 	Loaded = false;
 	Started = false;
 }
@@ -38,7 +39,7 @@ void ServerListner::Start () throw (std::runtime_error) {
 
 //Accept the incoming connection
 void ServerListner::AcceptConnection (int sockfd) throw (std::runtime_error) {
-	WorkersList.push_back(ServerWorker());
+	WorkersList.push_back(ServerWorker(Shared));
 	WorkersList.back().Serve(sockfd);
 }
 
