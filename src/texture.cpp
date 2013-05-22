@@ -23,7 +23,7 @@ Texture::~Texture () {
 
 void Texture::Load (XML & xml) throw(std::runtime_error) {
 	Name = xml.GetAttribute("name");
-	LoadImage(xml.GetAttribute("path"));
+	LoadImage("tmp/" + xml.GetAttribute("path"));
 	Loaded = true;
 }
 

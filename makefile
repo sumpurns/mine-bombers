@@ -21,12 +21,13 @@ COMMAND="cd mine-bombers && git pull origin master && make clean && make"
 .PHONY: client
 .PHONY: test
 .PHONY: upload
+.PHONY: prepare_tmp_dirs
 
-all: server client
+all: server client prepare_tmp_dirs
 client: $(BINARY)
 server: $(SERVER_BINARY)
 
-$(BINARY): $(OBJECTS)
+$(BINARY): $(OBJECTS) 
 	g++ $(OBJECTS) $(LIBS) -o $@
 
 $(SERVER_BINARY): $(SERVER_OBJECTS)
@@ -43,3 +44,6 @@ clean:
 
 upload:
 	ssh $(USER)@$(HOST) $(COMMAND)
+
+prepare_tmp_dirs:
+	mkdir -p tmp/res/art

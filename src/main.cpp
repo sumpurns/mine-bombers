@@ -45,6 +45,8 @@ class ClientWorker {
 		void GetGameMap () throw (std::runtime_error);
 		void GetGameFile (const std::string & name) throw (std::runtime_error);
 
+		void GetAllResources () throw (std::runtime_error);
+
 	protected: 
 	private:
 		Client Clnt;
@@ -58,7 +60,9 @@ ClientWorker::~ClientWorker () {
 
 void ClientWorker::Connect () throw (std::runtime_error) {
 	Clnt.Init();
-	Clnt.Connect("localhost", "12345");
+	if (!Clnt.Connect("localhost", "12345")) {
+		throw std::runtime_error("Can't connect to server");
+	}
 }
 
 void ClientWorker::Disconnect () throw (std::runtime_error) {
@@ -87,11 +91,25 @@ void ClientWorker::GetGameMap () throw (std::runtime_error) {
 	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
 	Clnt.RecvFile (LOC_GAME_MAP);
 }
+
 void ClientWorker::GetGameFile (const std::string & name) throw (std::runtime_error) {
 	RequestType rt = REQ_GAME_FILE;
 	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
 	Clnt.SendString (name);
 	Clnt.RecvFile ("tmp/" + name);
+}
+
+void ClientWorker::GetAllResources () throw (std::runtime_error) {
+	GetGameConfig();
+	GetGameMap();
+	XML xml;
+	xml.Load(LOC_GAME_XML);
+	xml.SelectSection("textures");
+	std::string resName;
+	for (bool b = xml.SelectNode("texture"); b; b = xml.SelectNextNode("texture")) {
+		resName = xml.GetAttribute("path");
+		GetGameFile(resName);
+	}
 }
 
 int main (int argc, char ** argv) {
@@ -113,21 +131,19 @@ int main (int argc, char ** argv) {
 		std::cout << err.what() << ", finishing client" << std::endl;
 		return 1;
 	}
-	//ClntWrk.GetGameConfig();
-	ClntWrk.GetGameMap();
-	ClntWrk.GetGameFile("res/art/ground.bmp");
+	ClntWrk.GetAllResources();
 	ClntWrk.Disconnect();
 
 	TextureRegistry texReg;
-	texReg.Load("res/game.xml");
+	texReg.Load(LOC_GAME_XML);
 	//int tId = texReg.GetTextureId("ground");
 	//const Texture & gnd = texReg[tId];
 
 	TerrainDefaults tDefs;
-	tDefs.Load("res/game.xml", texReg);
+	tDefs.Load(LOC_GAME_XML, texReg);
 
 	Map map;
-	map.Load("res/1.map", tDefs);
+	map.Load(LOC_GAME_MAP, tDefs);
 
 	SDL_Event event;
 	bool Done = false;
