@@ -1,5 +1,6 @@
 #include "socket.h"
 
+#include <vector>
 #include <fstream>
 #include <algorithm>
 #include <cstring>
@@ -76,11 +77,14 @@ void Socket::SendFile (const std::string & path) throw (std::runtime_error) {
 	file.seekg(0, std::fstream::beg);
 	size_t readen, sent;
 	char buf[NET_BLOCK];
-	while (file.good()) {
-		readen = file.readsome(buf, NET_BLOCK);
-		sent = Send(buf, readen);
-		if (sent != readen) {
-			throw std::runtime_error("Error sending a chunk");
+	for (sent = 0; sent < fileSize; sent += readen) {
+		file.read (buf, readen = std::min(fileSize - sent, (size_t)NET_BLOCK));
+		if (file.fail()) {
+			throw (std::runtime_error("Error while trying to read from file"));
+		}
+		size_t stBlock = 0;
+		while (stBlock < readen) {
+			stBlock += Send(buf + stBlock, readen - stBlock);
 		}
 	}
 	file.close();
@@ -88,7 +92,7 @@ void Socket::SendFile (const std::string & path) throw (std::runtime_error) {
 
 void Socket::RecvFile (const std::string & path) throw (std::runtime_error) {
 	std::ofstream file;
-	file.open(path.c_str());
+	file.open(path.c_str(), std::ofstream::out | std::ofstream::binary);
 	if (!file.is_open()) {
 		throw std::runtime_error("Can't open a file to recieve the data");
 	}
@@ -102,6 +106,21 @@ void Socket::RecvFile (const std::string & path) throw (std::runtime_error) {
 		written += recvd;
 	}
 	file.close();
+}
+
+void Socket::SendString (const std::string & str) throw (std::runtime_error) {
+	size_t len = str.length() + 1;
+	Send (reinterpret_cast<char*>(&len), sizeof(size_t));
+	Send (reinterpret_cast<const char*>(str.data()), len);
+}
+
+void Socket::RecvString (std::string & str) throw (std::runtime_error) {
+	size_t len;
+	Recv (reinterpret_cast<char*>(&len), sizeof(size_t));
+	std::vector<char> tstr;
+	tstr.resize(len);
+	Recv (reinterpret_cast<char*>(tstr.data()), len);
+	str.assign(tstr.begin(), tstr.end() - 1);
 }
 
 Client::Client () throw (std::runtime_error) {

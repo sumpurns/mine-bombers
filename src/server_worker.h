@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include "socket.h"
 #include "thread.h"
+#include "shared_config.h"
 
 class ServerWorker : public Thread {
 	public:
@@ -25,6 +26,8 @@ class ServerWorker : public Thread {
 	private:
 		bool Active;
 		Client Clnt;
+		RequestType LastReq;
+		std::string ReqArg;
 };
 
 #endif

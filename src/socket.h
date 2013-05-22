@@ -18,6 +18,9 @@ class Socket {
 
 		void SendFile (const std::string & path) throw (std::runtime_error);
 		void RecvFile (const std::string & path) throw (std::runtime_error);
+
+		void SendString (const std::string & str) throw (std::runtime_error);
+		void RecvString (std::string & str) throw (std::runtime_error);
 	protected:
 		int Sock;
 		bool Active;

@@ -38,7 +38,13 @@ class ClientWorker {
 		virtual ~ClientWorker ();
 
 		void Connect () throw (std::runtime_error);
+		void Disconnect () throw (std::runtime_error);
+
 		void CheckProtocol () throw (std::runtime_error);
+		void GetGameConfig () throw (std::runtime_error);
+		void GetGameMap () throw (std::runtime_error);
+		void GetGameFile (const std::string & name) throw (std::runtime_error);
+
 	protected: 
 	private:
 		Client Clnt;
@@ -55,6 +61,11 @@ void ClientWorker::Connect () throw (std::runtime_error) {
 	Clnt.Connect("localhost", "12345");
 }
 
+void ClientWorker::Disconnect () throw (std::runtime_error) {
+	RequestType rt = REQ_FINISH;
+	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
+}
+
 void ClientWorker::CheckProtocol () throw (std::runtime_error) {
 	Clnt.Send(SERVER_GREETING, strlen(SERVER_GREETING) + 1);
 	char buf[20];
@@ -63,8 +74,24 @@ void ClientWorker::CheckProtocol () throw (std::runtime_error) {
 		throw std::runtime_error("Wrong server reply");
 	}
 	std::cout << buf << std::endl;
+}
 
-	Clnt.RecvFile("test.xml");
+void ClientWorker::GetGameConfig () throw (std::runtime_error) {
+	RequestType rt = REQ_GAME_CONF;
+	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
+	Clnt.RecvFile (LOC_GAME_XML);
+}
+
+void ClientWorker::GetGameMap () throw (std::runtime_error) {
+	RequestType rt = REQ_GAME_MAP;
+	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
+	Clnt.RecvFile (LOC_GAME_MAP);
+}
+void ClientWorker::GetGameFile (const std::string & name) throw (std::runtime_error) {
+	RequestType rt = REQ_GAME_FILE;
+	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
+	Clnt.SendString (name);
+	Clnt.RecvFile ("tmp/" + name);
 }
 
 int main (int argc, char ** argv) {
@@ -86,6 +113,10 @@ int main (int argc, char ** argv) {
 		std::cout << err.what() << ", finishing client" << std::endl;
 		return 1;
 	}
+	//ClntWrk.GetGameConfig();
+	ClntWrk.GetGameMap();
+	ClntWrk.GetGameFile("res/art/ground.bmp");
+	ClntWrk.Disconnect();
 
 	TextureRegistry texReg;
 	texReg.Load("res/game.xml");

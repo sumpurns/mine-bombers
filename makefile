@@ -11,11 +11,16 @@ LIBS=`pkg-config --libs $(MODULES)`
 CFLAGS=`pkg-config --cflags $(MODULES)` -I. -Wall -g -pthread
 SERVER_LIBS=-pthread
 
+HOST=minebombers.servegame.com
+USER=user
+COMMAND="cd mine-bombers && git pull origin master && make clean && make"
+
 .PHONY: clean
 .PHONY: all
 .PHONY: server
 .PHONY: client
 .PHONY: test
+.PHONY: upload
 
 all: server client
 client: $(BINARY)
@@ -35,3 +40,6 @@ clean:
 	rm -f $(SERVER_BINARY)
 	rm -f $(OBJECTS)
 	rm -f $(SERVER_OBJECTS)
+
+upload:
+	ssh $(USER)@$(HOST) $(COMMAND)

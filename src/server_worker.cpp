@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <cstring>
-#include "shared_config.h"
 
 ServerWorker::ServerWorker () throw (std::runtime_error) {
 	Active = false;
@@ -28,7 +27,16 @@ void * ServerWorker::Main (void * arg) throw (std::runtime_error) {
 		return NULL;
 	}
 
-	Clnt.SendFile("res/game.xml");
+	bool finished = false;
+	while (!finished) {
+		GetRequest();
+		if (LastReq == REQ_FINISH) {
+			finished = true;
+			std::cout << "Recieved REQ_FINISH, quiting the worker" << std::endl;
+			break;
+		}
+		SendResponse();
+	}
 
 	return NULL;
 }
@@ -37,6 +45,7 @@ void ServerWorker::Serve (int sock) throw (std::runtime_error) {
 	GivenSockFd = sock;
 	Start(NULL);
 }
+
 void ServerWorker::CheckProtocol () throw (std::runtime_error) {
 	char buf[20];
 	Clnt.Recv (buf, strlen(SERVER_GREETING) + 1);
@@ -45,4 +54,39 @@ void ServerWorker::CheckProtocol () throw (std::runtime_error) {
 	}
 	std::cout << buf << std::endl;
 	Clnt.Send (CLIENT_GREETING, strlen(CLIENT_GREETING) + 1);
+}
+
+void ServerWorker::GetRequest () throw (std::runtime_error) {
+	Clnt.Recv(reinterpret_cast<char*>(&LastReq), sizeof(RequestType));
+	switch (LastReq) {
+		case REQ_GAME_FILE:
+			Clnt.RecvString (ReqArg);
+			std::cout << "Requested file \"" << ReqArg << "\"" << std::endl;
+			break;
+		case REQ_GAME_CONF:
+			std::cout << "Requested game.xml" << std::endl;
+			break;
+		case REQ_GAME_MAP:
+			std::cout << "Requested game map" << std::endl;
+			break;
+		default:
+			break;
+	}
+}
+
+void ServerWorker::SendResponse () throw (std::runtime_error) {
+	switch (LastReq) {
+		case REQ_GAME_FILE:
+			Clnt.SendFile(ReqArg);
+			break;
+		case REQ_GAME_CONF:
+			Clnt.SendFile("res/game.xml");
+			break;
+		case REQ_GAME_MAP:
+			Clnt.SendFile("res/1.map");
+			break;
+		default:
+			throw std::runtime_error ("Unsupported request");
+			break;
+	}
 }
