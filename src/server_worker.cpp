@@ -6,12 +6,14 @@
 ServerWorker::ServerWorker (ServerShared & shrd) throw (std::runtime_error) 
 : Shared(shrd) {
 	Active = false;
+	LoggedIn = false;
 }
 
 ServerWorker::ServerWorker (const ServerWorker & oth) throw (std::runtime_error) 
 : Shared(oth.Shared) {
 	Active = oth.Active;
 	GivenSockFd = oth.GivenSockFd;
+	LoggedIn = oth.LoggedIn;
 }
 
 ServerWorker::~ServerWorker () {
@@ -41,11 +43,17 @@ void * ServerWorker::Main (void * arg) throw (std::runtime_error) {
 		} catch (std::runtime_error & err) {
 			std::cout << err.what() << ". Finishing the worker cause of GetRequest exception" << std::endl;
 			finished = true;
+			if (LoggedIn && ClientId >= 0) {
+				Shared.Players.Unregister(ClientId);
+			}
 			break;
 		}
 		if (LastReq == REQ_FINISH) {
 			finished = true;
 			std::cout << "Recieved REQ_FINISH, quiting the worker" << std::endl;
+			if (LoggedIn && ClientId >= 0) {
+				Shared.Players.Unregister(ClientId);
+			}
 			break;
 		}
 		try {
@@ -53,6 +61,9 @@ void * ServerWorker::Main (void * arg) throw (std::runtime_error) {
 		} catch (std::runtime_error & err) {
 			std::cout << err.what() << ". Finishing the worker cause of SendResponse exception" << std::endl;
 			finished = true;
+			if (LoggedIn && ClientId >= 0) {
+				Shared.Players.Unregister(ClientId);
+			}
 			break;
 		}
 	}
@@ -100,7 +111,6 @@ void ServerWorker::GetRequest () throw (std::runtime_error) {
 }
 
 void ServerWorker::SendResponse () throw (std::runtime_error) {
-	int cId = -3;
 	size_t snt = 1;
 	switch (LastReq) {
 		case REQ_GAME_FILE:
@@ -113,8 +123,11 @@ void ServerWorker::SendResponse () throw (std::runtime_error) {
 			Clnt.SendFile("res/1.map");
 			break;
 		case REQ_LOGIN:
-			cId = Shared.Players.RegisterNick(ReqArg);
-			snt = Clnt.Send(reinterpret_cast<char*>(&cId), sizeof(int));
+			ClientId = Shared.Players.RegisterNick(ReqArg);
+			snt = Clnt.Send(reinterpret_cast<char*>(&ClientId), sizeof(int));
+			if (ClientId >=0) {
+				LoggedIn = true;
+			}
 			break;
 		default:
 			throw std::runtime_error ("Unsupported request");

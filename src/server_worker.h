@@ -31,6 +31,8 @@ class ServerWorker : public Thread {
 		Client Clnt;
 		RequestType LastReq;
 		std::string ReqArg;
+		bool LoggedIn;
+		int ClientId;
 };
 
 #endif
