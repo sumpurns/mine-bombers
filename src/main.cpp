@@ -60,7 +60,7 @@ ClientWorker::~ClientWorker () {
 
 void ClientWorker::Connect () throw (std::runtime_error) {
 	Clnt.Init();
-	if (!Clnt.Connect("localhost", "12345")) {
+	if (!Clnt.Connect(DEFAULT_SERVER_ADDR, "12345")) {
 		throw std::runtime_error("Can't connect to server");
 	}
 }
