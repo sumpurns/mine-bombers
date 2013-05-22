@@ -35,6 +35,11 @@ static void Sulock() {
 
 
 int main (int argc, char ** argv) {
+	if (argc < 2) {
+		std::cout << "Too few args. Usage:" << std::endl << "mb <NickName>" << std::endl;
+		return 1;
+	}
+
 	if (0 > SDL_Init(SDL_INIT_VIDEO)) {
 		std::cout << "Can not init SDL library" << std::endl;
 		return 1;
@@ -54,7 +59,7 @@ int main (int argc, char ** argv) {
 		return 1;
 	}
 	try {
-		ClntWrk.Login();
+		ClntWrk.Login(argv[1]);
 	} catch (std::runtime_error & err) {
 		std::cout << "Nickname is not accepted" << std::endl;
 		ClntWrk.Disconnect();

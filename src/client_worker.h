@@ -13,7 +13,7 @@ class ClientWorker {
 		void Connect () throw (std::runtime_error);
 		void Disconnect () throw (std::runtime_error);
 
-		void Login () throw (std::runtime_error);
+		void Login (const std::string & nick) throw (std::runtime_error);
 
 		void CheckProtocol () throw (std::runtime_error);
 		void GetGameConfig () throw (std::runtime_error);

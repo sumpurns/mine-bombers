@@ -32,10 +32,10 @@ void ClientWorker::CheckProtocol () throw (std::runtime_error) {
 	std::cout << buf << std::endl;
 }
 
-void ClientWorker::Login () throw (std::runtime_error) {
+void ClientWorker::Login (const std::string & nick) throw (std::runtime_error) {
 	RequestType rt = REQ_LOGIN;
 	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
-	Clnt.SendString("player_name_here");
+	Clnt.SendString(nick);
 	int playerId;
 	Clnt.Recv(reinterpret_cast<char*>(&playerId), sizeof(int));
 	if (playerId < 0) {

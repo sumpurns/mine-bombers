@@ -49,6 +49,7 @@ int PlayersList::RegisterNick (const std::string & nick) throw (std::runtime_err
 		throw std::runtime_error("PlayersList is not ready for action");
 	}
 	if (!CheckNickAvail(nick)) {
+		Mute.Unlock();
 		return -2;
 	}
 	for (int id = 0; id < (int)Records.size(); id++) {
