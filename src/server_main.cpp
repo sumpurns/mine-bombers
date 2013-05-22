@@ -1,11 +1,10 @@
 #include <iostream>
+#include <vector>
 //#include "socket.h"
 #include "server_listner.h"
 #include "server_worker.h"
 #include "thread.h"
 
-
-#include <sys/sem.h>
 
 class PlayerRecord {
 	public:
@@ -27,7 +26,7 @@ class ServerMain : public Thread {
 		
 		void * Main (void * arg) throw (std::runtime_error);
 		
-		int RegisterPlayer (const & std::string & nick) throw (std::runtime_error);
+		int RegisterPlayer (const std::string & nick) throw (std::runtime_error);
 
 		void Init (ServerListner & srvLstner);
 		void HandleWorkers () throw (std::runtime_error);
