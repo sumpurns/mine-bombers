@@ -4,17 +4,39 @@
 #include "server_worker.h"
 #include "thread.h"
 
+
+#include <sys/sem.h>
+
+class PlayerRecord {
+	public:
+		std::string Nick;
+		bool Free;
+	protected:
+	private:
+};
+
+class PlayersList {
+	public:
+		std::vector<PlayerRecord> Records;
+};
+
+class ServerMain : public Thread {
+	public:
+		ServerMain () throw (std::runtime_error);
+		~ServerMain ();
+		
+		void * Main (void * arg) throw (std::runtime_error);
+		
+		int RegisterPlayer (const & std::string & nick) throw (std::runtime_error);
+
+		void Init (ServerListner & srvLstner);
+		void HandleWorkers () throw (std::runtime_error);
+	protected:
+	private:
+};
+
 int main (int argc, char ** argv) {
 	std::cout << "MineBombers server. You are welcome." << std::endl;
-/*	char buf[300];
-	Server srv;
-	Client tlk;
-	srv.Init();
-	srv.Bind("12345");
-	srv.Listen();
-	tlk.Init(srv.Accept());
-	tlk.Recv(buf, 300);
-	std::cout << buf << std::endl;*/
 	ServerListner srv;
 	srv.Load("res/game.xml");
 	srv.Start();

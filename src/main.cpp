@@ -40,6 +40,8 @@ class ClientWorker {
 		void Connect () throw (std::runtime_error);
 		void Disconnect () throw (std::runtime_error);
 
+		void Login () throw (std::runtime_error);
+
 		void CheckProtocol () throw (std::runtime_error);
 		void GetGameConfig () throw (std::runtime_error);
 		void GetGameMap () throw (std::runtime_error);
@@ -78,6 +80,18 @@ void ClientWorker::CheckProtocol () throw (std::runtime_error) {
 		throw std::runtime_error("Wrong server reply");
 	}
 	std::cout << buf << std::endl;
+}
+
+void ClientWorker::Login () throw (std::runtime_error) {
+	RequestType rt = REQ_LOGIN;
+	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
+	Clnt.SendString("player_name_here");
+	int playerId;
+	Clnt.Recv(reinterpret_cast<char*>(&playerId), sizeof(int));
+	if (playerId < 0) {
+		throw std::runtime_error("Server returned invalid playerId");
+	}
+	std::cout << "Player ID: " << playerId << std::endl;
 }
 
 void ClientWorker::GetGameConfig () throw (std::runtime_error) {
@@ -131,6 +145,7 @@ int main (int argc, char ** argv) {
 		std::cout << err.what() << ", finishing client" << std::endl;
 		return 1;
 	}
+	ClntWrk.Login();
 	ClntWrk.GetAllResources();
 	ClntWrk.Disconnect();
 

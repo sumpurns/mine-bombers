@@ -69,12 +69,17 @@ void ServerWorker::GetRequest () throw (std::runtime_error) {
 		case REQ_GAME_MAP:
 			std::cout << "Requested game map" << std::endl;
 			break;
+		case REQ_LOGIN:
+			Clnt.RecvString (ReqArg);
+			std::cout << "Player logged in with a nickname: " << ReqArg << std::endl;
+			break;
 		default:
 			break;
 	}
 }
 
 void ServerWorker::SendResponse () throw (std::runtime_error) {
+	int cId = 1;
 	switch (LastReq) {
 		case REQ_GAME_FILE:
 			Clnt.SendFile(ReqArg);
@@ -84,6 +89,9 @@ void ServerWorker::SendResponse () throw (std::runtime_error) {
 			break;
 		case REQ_GAME_MAP:
 			Clnt.SendFile("res/1.map");
+			break;
+		case REQ_LOGIN:
+			Clnt.Send(reinterpret_cast<char*>(&cId), sizeof(int));
 			break;
 		default:
 			throw std::runtime_error ("Unsupported request");
