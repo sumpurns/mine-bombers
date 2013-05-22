@@ -4,20 +4,10 @@
 #include "server_listner.h"
 #include "server_worker.h"
 #include "thread.h"
+#include "server_shared.h"
 
 
-class PlayerRecord {
-	public:
-		std::string Nick;
-		bool Free;
-	protected:
-	private:
-};
 
-class PlayersList {
-	public:
-		std::vector<PlayerRecord> Records;
-};
 
 class ServerMain : public Thread {
 	public:
@@ -34,8 +24,12 @@ class ServerMain : public Thread {
 	private:
 };
 
+
 int main (int argc, char ** argv) {
 	std::cout << "MineBombers server. You are welcome." << std::endl;
+
+	ServerShared shared;
+
 	ServerListner srv;
 	srv.Load("res/game.xml");
 	srv.Start();

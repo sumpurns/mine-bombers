@@ -2,7 +2,7 @@ SOURCES=src/main.cpp src/xml.cpp src/texture.cpp src/textures_reg.cpp src/helper
 OBJECTS=$(SOURCES:.cpp=.o)
 BINARY=mb
 
-SERVER_SOURCES=src/xml.cpp src/helpers.cpp src/terrain.cpp src/terrain_defs.cpp src/socket.cpp src/server_main.cpp src/texture.cpp  src/textures_reg.cpp src/server_listner.cpp src/server_worker.cpp src/thread.cpp src/map.cpp
+SERVER_SOURCES=src/xml.cpp src/helpers.cpp src/terrain.cpp src/terrain_defs.cpp src/socket.cpp src/server_main.cpp src/texture.cpp  src/textures_reg.cpp src/server_listner.cpp src/server_worker.cpp src/thread.cpp src/map.cpp src/players_list.cpp
 SERVER_OBJECTS=$(SERVER_SOURCES:.cpp=.o)
 SERVER_BINARY=mbsrv
 
