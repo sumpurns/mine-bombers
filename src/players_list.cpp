@@ -10,6 +10,9 @@ PlayersList::~PlayersList () {
 
 void PlayersList::Init (int plrsCount) throw (std::runtime_error) {
 	Records.resize(4);
+	for (int id = 0; id < plrsCount; id++) {
+		Records[id].Free = true;
+	}
 	Ready = true;
 }
 
@@ -42,6 +45,7 @@ bool PlayersList::HasFreeSlot () throw (std::runtime_error) {
 int PlayersList::RegisterNick (const std::string & nick) throw (std::runtime_error) {
 	Mute.Lock();
 	if (!Ready) {
+		Mute.Unlock();
 		throw std::runtime_error("PlayersList is not ready for action");
 	}
 	if (!CheckNickAvail(nick)) {
@@ -51,6 +55,7 @@ int PlayersList::RegisterNick (const std::string & nick) throw (std::runtime_err
 		if (Records[id].Free) {
 			Records[id].Nick = nick;
 			Records[id].Free = false;
+			Mute.Unlock();
 			return id;
 		}
 	}
@@ -61,6 +66,7 @@ int PlayersList::RegisterNick (const std::string & nick) throw (std::runtime_err
 void PlayersList::Unregister (int id) throw (std::runtime_error) {
 	Mute.Lock();
 	if (!Ready) {
+		Mute.Unlock();
 		throw std::runtime_error("PlayersList is not ready for action");
 	}
 	Records[id].Free = true;

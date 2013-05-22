@@ -145,7 +145,13 @@ int main (int argc, char ** argv) {
 		std::cout << err.what() << ", finishing client" << std::endl;
 		return 1;
 	}
-	ClntWrk.Login();
+	try {
+		ClntWrk.Login();
+	} catch (std::runtime_error & err) {
+		std::cout << "Nickname is not accepted" << std::endl;
+		ClntWrk.Disconnect();
+		return 1;
+	}
 	ClntWrk.GetAllResources();
 	ClntWrk.Disconnect();
 

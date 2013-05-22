@@ -37,13 +37,21 @@ void * ServerWorker::Main (void * arg) throw (std::runtime_error) {
 
 	bool finished = false;
 	while (!finished) {
-		GetRequest();
+		try {
+			GetRequest();
+		} catch (std::runtime_error & err) {
+			std::cout << err.what() << ". Finishing the worker cause of GetRequest exception" << std::endl;
+		}
 		if (LastReq == REQ_FINISH) {
 			finished = true;
 			std::cout << "Recieved REQ_FINISH, quiting the worker" << std::endl;
 			break;
 		}
-		SendResponse();
+		try {
+			SendResponse();
+		} catch (std::runtime_error & err) {
+			std::cout << err.what() << ". Finishing the worker cause of SendResponse exception" << std::endl;
+		}
 	}
 
 	return NULL;
@@ -65,7 +73,9 @@ void ServerWorker::CheckProtocol () throw (std::runtime_error) {
 }
 
 void ServerWorker::GetRequest () throw (std::runtime_error) {
-	Clnt.Recv(reinterpret_cast<char*>(&LastReq), sizeof(RequestType));
+	if (0 == Clnt.Recv(reinterpret_cast<char*>(&LastReq), sizeof(RequestType))) {
+		throw std::runtime_error ("Client disconnected suddenly");
+	}
 	switch (LastReq) {
 		case REQ_GAME_FILE:
 			Clnt.RecvString (ReqArg);
@@ -87,7 +97,8 @@ void ServerWorker::GetRequest () throw (std::runtime_error) {
 }
 
 void ServerWorker::SendResponse () throw (std::runtime_error) {
-	int cId = 1;
+	int cId = -3;
+	size_t snt = 1;
 	switch (LastReq) {
 		case REQ_GAME_FILE:
 			Clnt.SendFile(ReqArg);
@@ -99,10 +110,14 @@ void ServerWorker::SendResponse () throw (std::runtime_error) {
 			Clnt.SendFile("res/1.map");
 			break;
 		case REQ_LOGIN:
-			Clnt.Send(reinterpret_cast<char*>(&cId), sizeof(int));
+			cId = Shared.Players.RegisterNick(ReqArg);
+			snt = Clnt.Send(reinterpret_cast<char*>(&cId), sizeof(int));
 			break;
 		default:
 			throw std::runtime_error ("Unsupported request");
 			break;
+	}
+	if (snt == 0) {
+		throw std::runtime_error("Client died [Send returneed 0]");
 	}
 }

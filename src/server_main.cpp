@@ -29,6 +29,7 @@ int main (int argc, char ** argv) {
 	std::cout << "MineBombers server. You are welcome." << std::endl;
 
 	ServerShared shared;
+	shared.Players.Init(2);
 
 	ServerListner srv(shared);
 	srv.Load("res/game.xml");
