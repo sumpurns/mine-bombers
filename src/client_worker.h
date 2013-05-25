@@ -22,6 +22,8 @@ class ClientWorker {
 
 		void GetAllResources () throw (std::runtime_error);
 
+		bool SetReadyState () throw (std::runtime_error);
+
 	protected: 
 	private:
 		Client Clnt;

@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <cstring>
+#include <unistd.h>
 #include <SDL/SDL.h>
 
 #include "helpers.h"
@@ -58,14 +59,16 @@ int main (int argc, char ** argv) {
 		std::cout << err.what() << ", finishing client" << std::endl;
 		return 1;
 	}
-	//try {
+	try {
 		ClntWrk.Login(argv[1]);
-	/*} catch (std::runtime_error & err) {
-		std::cout << "Nickname is not accepted" << std::endl;
+	} catch (std::runtime_error & err) {
+		std::cout << err.what() << ", login failed, quiting" << std::endl;
 		ClntWrk.Disconnect();
 		return 1;
-	}*/
+	}
 	ClntWrk.GetAllResources();
+	sleep(5);
+	ClntWrk.SetReadyState();
 	ClntWrk.Disconnect();
 
 	TextureRegistry texReg;

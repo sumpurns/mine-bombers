@@ -105,6 +105,9 @@ void ServerWorker::GetRequest () throw (std::runtime_error) {
 			Clnt.RecvString (ReqArg);
 			std::cout << "Player logged in with a nickname: " << ReqArg << std::endl;
 			break;
+		case REQ_READY:
+			std::cout << "Player [id = " << ClientId << "] set to state \"ready\"" << std::endl;
+			break;
 		default:
 			break;
 	}
@@ -112,6 +115,7 @@ void ServerWorker::GetRequest () throw (std::runtime_error) {
 
 void ServerWorker::SendResponse () throw (std::runtime_error) {
 	size_t snt = 1;
+	ResponseType resp;
 	switch (LastReq) {
 		case REQ_GAME_FILE:
 			Clnt.SendFile(ReqArg);
@@ -128,6 +132,17 @@ void ServerWorker::SendResponse () throw (std::runtime_error) {
 			if (ClientId >=0) {
 				LoggedIn = true;
 			}
+			break;
+		case REQ_READY:
+			Shared.Players.SetReadyFlag(ClientId);
+			if (Shared.Players.AllPlayersReady()) {
+				std::cout << "All clients are connected, let us start the party" << std::endl;
+				Shared.Players.BroadcastStartMessage();
+			}
+			Shared.Players.AwaitUnlocking(ClientId);
+			std::cout << "Server worker now is free from loack, continuing with RESP_START" << std::endl;
+			resp = RESP_START;
+			Clnt.Send(reinterpret_cast<char*>(&resp), sizeof(ResponseType)); 
 			break;
 		default:
 			throw std::runtime_error ("Unsupported request");

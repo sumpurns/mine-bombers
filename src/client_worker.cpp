@@ -12,7 +12,7 @@ ClientWorker::~ClientWorker () {
 
 void ClientWorker::Connect () throw (std::runtime_error) {
 	Clnt.Init();
-	if (!Clnt.Connect(DEFAULT_SERVER_ADDR, "12345")) {
+	if (!Clnt.Connect(DEFAULT_SERVER_ADDR, DEFAULT_SERVER_PORT)) {
 		throw std::runtime_error("Can't connect to server");
 	}
 }
@@ -74,4 +74,20 @@ void ClientWorker::GetAllResources () throw (std::runtime_error) {
 		resName = xml.GetAttribute("path");
 		GetGameFile(resName);
 	}
+}
+
+bool ClientWorker::SetReadyState () throw (std::runtime_error) {
+	RequestType rt = REQ_READY;
+	Clnt.Send (reinterpret_cast<char*>(&rt), sizeof(RequestType));
+	ResponseType resp;
+	Clnt.Recv (reinterpret_cast<char*>(&resp), sizeof(ResponseType));
+	if (resp == RESP_START) {
+		std::cout << "The party starts right now!" << std::endl;
+		return true;
+	} else if (resp == RESP_START_CANCELLED) {
+		return false;
+	} else {
+		throw std::runtime_error("Server responded inaduquate on REQ_READY packet");
+	}
+	return false;
 }

@@ -6,6 +6,7 @@ ServerListner::ServerListner (ServerShared & shrd) throw (std::runtime_error)
 : Shared(shrd) {
 	Loaded = false;
 	Started = false;
+	Shared.Players.Init(2);
 }
 
 ServerListner::~ServerListner () {
