@@ -1,4 +1,4 @@
-SOURCES=src/main.cpp src/xml.cpp src/texture.cpp src/textures_reg.cpp src/helpers.cpp src/terrain.cpp src/terrain_defs.cpp src/socket.cpp src/map.cpp
+SOURCES=src/main.cpp src/xml.cpp src/texture.cpp src/textures_reg.cpp src/helpers.cpp src/terrain.cpp src/terrain_defs.cpp src/socket.cpp src/map.cpp src/client_worker.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 BINARY=mb
 
