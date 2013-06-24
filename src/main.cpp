@@ -65,8 +65,6 @@ int main (int argc, char ** argv) {
 
 	TextureRegistry texReg;
 	texReg.Load(LOC_GAME_XML);
-	//int tId = texReg.GetTextureId("ground");
-	//const Texture & gnd = texReg[tId];
 
 	TerrainDefaults tDefs;
 	tDefs.Load(LOC_GAME_XML, texReg);
@@ -92,6 +90,7 @@ int main (int argc, char ** argv) {
 			}
 		}
 	}
+
 	SDL_Quit();
 	return 0;
 }

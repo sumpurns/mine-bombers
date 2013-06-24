@@ -1,13 +1,9 @@
 #include <iostream>
 #include <vector>
-//#include "socket.h"
 #include "server_listner.h"
 #include "server_worker.h"
 #include "thread.h"
 #include "server_shared.h"
-
-
-
 
 class ServerMain : public Thread {
 	public:
